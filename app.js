@@ -6,7 +6,6 @@ const apiRouter = require('./routes/api');
 
 const app = express();
 
-/*
 //setup mongoose collection
 const mongoose = require('mongoose');
 const mongoDB = process.env.DB_URL;
@@ -16,7 +15,7 @@ db.once('open', function() {
   console.log("MongoDB database connection established successfully");
 });
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-*/
+
 
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
