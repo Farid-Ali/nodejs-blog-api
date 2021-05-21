@@ -45,7 +45,11 @@ exports.article_create_post = [
     .trim()
     .isLength({ min: 1 })
     .escape(),
-  body("body", "Body must not be empty.").trim().isLength({ min: 1 }).escape(),
+  body("body", "Body must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body('comments.*').escape(),
   body("author", "Author must not be empty.")
     .trim()
     .isLength({ min: 1 })
@@ -60,6 +64,7 @@ exports.article_create_post = [
     let article = new Article({
       title: req.body.title,
       body: req.body.body,
+      comments: req.body.comment,
       author: req.body.author,
     });
 
@@ -80,7 +85,7 @@ exports.article_create_post = [
           return next(err);
         }
         //successful
-        res.json(article.url);
+        res.sendStatus(200);
       });
     }
   },

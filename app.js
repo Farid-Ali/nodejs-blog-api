@@ -20,6 +20,9 @@ db.once("open", function () {
 });
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
 app.use("/", indexRouter);
 app.use("/api", apiRouter);
 

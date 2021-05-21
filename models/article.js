@@ -13,7 +13,7 @@ const ArticleSchema = new Schema(
 
 //virtual for article's URL
 ArticleSchema.virtual("url").get(function () {
-  return "/blogs/article/" + this._id;
+  return "/api/article/" + this._id;
 });
 
 module.exports = mongoose.model("Article", ArticleSchema);
