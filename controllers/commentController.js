@@ -1,43 +1,140 @@
 const Comment = require("../models/comment");
+const { body, validationResult } = require("express-validator");
 
 //Comment create on GET
 exports.comment_create_get = function (req, res, next) {
   res.json({
-    message: "Comment create get not implemented",
+    message: "Create new comment",
   });
 };
 
 //Handle comment create on POST
-exports.comment_create_post = function (req, res, next) {
-  res.json({
-    message: "Comment create post not implemented",
-  });
-};
+exports.comment_create_post = [
+  //validate and sanitize fields
+  body("body", "Comment body must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("user", "User must not be empty.").trim().isLength({ min: 1 }).escape(),
+  body("article", "Article must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
+  //proccess request after validation and sanitization
+  (req, res, next) => {
+    //extract validation errors from a request
+    const errors = validationResult(req);
+
+    //create User object with escaped and trimmed data
+    let comment = new Comment({
+      body: req.body.body,
+      user: req.body.user,
+      article: req.body.article,
+    });
+
+    if (!errors.isEmpty()) {
+      //there are errors. send same json data as comment_create_get
+      res.json({
+        message: "Create new comment",
+      });
+      return;
+    } else {
+      //data is valid. save article
+      comment.save(function (err) {
+        if (err) {
+          return next(err);
+        }
+        //successful
+        res.sendStatus(200);
+      });
+    }
+  },
+];
 
 //Comment delete on GET
 exports.comment_delete_get = function (req, res, next) {
-  res.json({
-    message: "Comment delete get not implemented",
+  Comment.findById(req.params.id).exec(function (err, comment) {
+    if (err) {
+      return next(err);
+    }
+    //successful
+    res.json(comment);
   });
 };
 
 //Comment delete on GET
 exports.comment_delete_post = function (req, res, next) {
-  res.json({
-    message: "Comment delete post not implemented",
+  Comment.findByIdAndRemove(req.body.commentid, function deleteComment(err) {
+    if (err) {
+      next(err);
+    }
+    //success - send success message
+    res.sendStatus(200);
   });
 };
 
 //Comment update on GET
 exports.comment_update_get = function (req, res, next) {
-  res.json({
-    message: "Comment update get not implemented",
+  Comment.findById(req.params.id).exec(function (err, comment) {
+    if (err) {
+      next(err);
+    }
+    //successful
+    res.json(comment);
   });
 };
 
 //Comment create on GET
-exports.comment_update_post = function (req, res, next) {
-  res.json({
-    message: "Comment update post not implemented",
-  });
-};
+exports.comment_update_post = [
+  //validate and sanitize fields
+  body("body", "Comment body must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("user", "User must not be empty.").trim().isLength({ min: 1 }).escape(),
+  body("article", "Article must not be empty.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
+  //proccess request after validation and sanitization
+  (req, res, next) => {
+    //extreact the validation errors from a request
+    const errors = validationResult(req);
+
+    //create an comment object with escaped/trimmed data and old id
+    let comment = new Comment({
+      body: req.body.body,
+      user: req.body.user,
+      article: req.body.article,
+      _id: req.params.id,
+    });
+
+    if (!errors.isEmpty()) {
+      //there are errors. send same json data as comment_update_get
+      Comment.findById(req.params.id).exec(function (err, comment) {
+        if (err) {
+          next(err);
+        }
+        //successful
+        res.json(comment);
+      });
+      return;
+    } else {
+      //data from form is valid. update the record
+      Comment.findByIdAndUpdate(
+        req.params.id,
+        comment,
+        {},
+        function (err, thecomment) {
+          if (err) {
+            return next(err);
+          }
+          //successful
+          res.sendStatus(200);
+        }
+      );
+    }
+  },
+];

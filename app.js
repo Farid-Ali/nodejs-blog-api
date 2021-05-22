@@ -13,6 +13,7 @@ mongoose.connect(mongoDB, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true,
+  useFindAndModify: false,
 });
 const db = mongoose.connection;
 db.once("open", function () {
