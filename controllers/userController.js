@@ -99,7 +99,7 @@ exports.user_delete_post = function (req, res, next) {
   });
 };
 
-//User update on GET FIXME
+//User update on GET
 exports.user_update_get = function (req, res, next) {
   User.findById(req.params.id).exec(function (err, user) {
     if (err) {

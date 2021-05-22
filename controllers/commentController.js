@@ -1,4 +1,5 @@
 const Comment = require("../models/comment");
+const Article = require("../models/article");
 const { body, validationResult } = require("express-validator");
 
 //Comment create on GET
@@ -40,11 +41,19 @@ exports.comment_create_post = [
       });
       return;
     } else {
-      //data is valid. save article
+      //data is valid. save comment
       comment.save(function (err) {
         if (err) {
           return next(err);
         }
+        //add comment to the article
+        Article.findOne({ _id: comment.article }, function (err, article) {
+          if (err) {
+            next(err);
+          }
+          article.comments.push(comment._id);
+          article.save();
+        });
         //successful
         res.sendStatus(200);
       });
@@ -63,12 +72,25 @@ exports.comment_delete_get = function (req, res, next) {
   });
 };
 
-//Comment delete on GET
+//Comment delete on POST
 exports.comment_delete_post = function (req, res, next) {
   Comment.findByIdAndRemove(req.body.commentid, function deleteComment(err) {
     if (err) {
       next(err);
     }
+    //remove comment from article
+    Article.findOne({ comments: req.body.commentid }, function (err, article) {
+      if (err) {
+        next(err);
+      }
+      //determine the index of the comment which we want to remove
+      const index = article.comments.indexOf(req.body.commentid);
+      //remove the comment
+      if (index > -1) {
+        article.comments.splice(index, 1);
+      }
+      article.save();
+    });
     //success - send success message
     res.sendStatus(200);
   });
